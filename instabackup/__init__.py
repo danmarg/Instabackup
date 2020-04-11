@@ -9,7 +9,7 @@ from pyinstapaper.instapaper import Instapaper
 INDEX_FILE = '.index'
 
 def slugify(value):
-    return re.sub(r'/[^\w\-]+/g', '', value)
+    return re.sub(r'[^\w\- ]', '', value)
 
 @retry(delay=1, backoff=2, tries=3)
 def get_text(bookmark):
