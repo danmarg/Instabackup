@@ -41,7 +41,7 @@ def main():
         out = os.path.join(args.backup, ftitle)
         if not os.path.exists(out):
             os.makedirs(out)
-        bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(fid, []))
+        bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(str(fid), []))
         i = 0
         tot = len(bs)
         for b in bs:
@@ -59,7 +59,7 @@ def main():
             fname += '.html'
             with open(fname, 'wb') as output:
                 output.write(text)
-            index[fid] = index.get(fid, []) + [str(b.bookmark_id) + ':' + b.hash]
+            index[str(fid)] = index.get(str(fid), []) + [str(b.bookmark_id) + ':' + b.hash]
 
     # Save the backup index.
     with open(INDEX_FILE, 'w') as index_file:
