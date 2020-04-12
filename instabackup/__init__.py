@@ -34,7 +34,6 @@ if os.path.exists(INDEX_FILE):
         index = json.load(index_file)
 
 folders = instapaper.get_folders()
-seen = []  # Use to skip bookmarks that were in a folder and unread/archived.
 
 folders = [(folder.folder_id, folder.title) for folder in folders] + [
            ('unread', 'unread'), ('archive', 'archive')]
@@ -45,21 +44,19 @@ for (fid, ftitle) in folders:
         os.makedirs(out)
     bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(fid, []))
     for b in bs:
-        if b.bookmark_id not in seen:
-            print(f'\tDownloading "{b.title}"')
-            text = None
-            try:
-              text = get_text(b)
-            except:
-                print(f'Fatal error downloading "{b.title}"!')
-                continue
-            fname = os.path.join(out, slugify(b.title))
-            if os.path.exists(fname + '.html'):
-                fname  += b.hash
-            fname += '.html'
-            with open(fname, 'wb') as output:
-                output.write(text)
-            seen.append(b.bookmark_id)
+        print(f'\tDownloading "{b.title}"')
+        text = None
+        try:
+          text = get_text(b)
+        except:
+            print(f'Fatal error downloading "{b.title}"!')
+            continue
+        fname = os.path.join(out, slugify(b.title))
+        if os.path.exists(fname + '.html'):
+            fname  += b.hash
+        fname += '.html'
+        with open(fname, 'wb') as output:
+            output.write(text)
         index[fid] = index.get(fid, []) + [str(b.bookmark_id) + ':' + b.hash] 
 
 with open(INDEX_FILE, 'w') as index_file:
