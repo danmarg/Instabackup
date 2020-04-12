@@ -6,8 +6,6 @@ import re
 from retry import retry
 from pyinstapaper.instapaper import Instapaper
 
-INDEX_FILE = '.index'
-
 def slugify(value):
     return re.sub(r'[^\w\- ]', '', value)
 
@@ -15,49 +13,54 @@ def slugify(value):
 def get_text(bookmark):
     return bookmark.get_text()['data']
 
-parser = argparse.ArgumentParser(description = 'Backup Instapaper')
-parser.add_argument('--username', type=str, help='Instapaper username')
-parser.add_argument('--password', type=str, help='Instapaper password')
-parser.add_argument('--backup', type=str, help='Backup directory')
-parser.add_argument('--client_id', type=str, help='Instapaper OAuth client ID')
-parser.add_argument('--client_secret', type=str, help='Instapaper OAuth client secret')
-args = parser.parse_args()
+def main():
+    parser = argparse.ArgumentParser(description = 'Backup Instapaper')
+    parser.add_argument('--username', type=str, help='Instapaper username')
+    parser.add_argument('--password', type=str, help='Instapaper password')
+    parser.add_argument('--backup', type=str, help='Backup directory')
+    parser.add_argument('--client_id', type=str, help='Instapaper OAuth client ID')
+    parser.add_argument('--client_secret', type=str, help='Instapaper OAuth client secret')
+    args = parser.parse_args()
 
-instapaper = Instapaper(args.client_id, args.client_secret)
-instapaper.login(args.username, args.password)
+    instapaper = Instapaper(args.client_id, args.client_secret)
+    instapaper.login(args.username, args.password)
 
-# Load the backup index.
-INDEX_FILE = os.path.join(args.backup, INDEX_FILE)
-index = {}
-if os.path.exists(INDEX_FILE):
-    with open(INDEX_FILE, 'r') as index_file:
-        index = json.load(index_file)
+    # Load the backup index.
+    INDEX_FILE = os.path.join(args.backup, '.index')
+    index = {}
+    if os.path.exists(INDEX_FILE):
+        with open(INDEX_FILE, 'r') as index_file:
+            index = json.load(index_file)
 
-folders = instapaper.get_folders()
+    folders = instapaper.get_folders()
 
-folders = [(folder.folder_id, folder.title) for folder in folders] + [
-           ('unread', 'unread'), ('archive', 'archive')]
-for (fid, ftitle) in folders:
-    print(f'Syncing "{ftitle}"')
-    out = os.path.join(args.backup, ftitle)
-    if not os.path.exists(out):
-        os.makedirs(out)
-    bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(fid, []))
-    for b in bs:
-        print(f'\tDownloading "{b.title}"')
-        text = None
-        try:
-          text = get_text(b)
-        except:
-            print(f'Fatal error downloading "{b.title}"!')
-            continue
-        fname = os.path.join(out, slugify(b.title))
-        if os.path.exists(fname + '.html'):
-            fname  += b.hash
-        fname += '.html'
-        with open(fname, 'wb') as output:
-            output.write(text)
-        index[fid] = index.get(fid, []) + [str(b.bookmark_id) + ':' + b.hash] 
+    folders = [(folder.folder_id, folder.title) for folder in folders] + [
+               ('unread', 'unread'), ('archive', 'archive')]
+    for (fid, ftitle) in folders:
+        print(f'Syncing "{ftitle}"')
+        out = os.path.join(args.backup, ftitle)
+        if not os.path.exists(out):
+            os.makedirs(out)
+        bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(fid, []))
+        i = 0
+        tot = len(bs)
+        for b in bs:
+            i += 1
+            print(f'\t [{i} of {tot}] - Downloading "{b.title}"')
+            text = None
+            try:
+              text = get_text(b)
+            except:
+                print(f'Fatal error downloading "{b.title}"!')
+                continue
+            fname = os.path.join(out, slugify(b.title))
+            if os.path.exists(fname + '.html'):
+                fname  += b.hash
+            fname += '.html'
+            with open(fname, 'wb') as output:
+                output.write(text)
+            index[fid] = index.get(fid, []) + [str(b.bookmark_id) + ':' + b.hash]
 
-with open(INDEX_FILE, 'w') as index_file:
-    json.dump(index, index_file)
+    # Save the backup index.
+    with open(INDEX_FILE, 'w') as index_file:
+        json.dump(index, index_file)

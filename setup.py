@@ -3,7 +3,7 @@ setuptools.setup(
      name='instabackup',  
      version='0.1',
      entry_points={
-         'console_scripts': ['instabackup=instabackup.instabackup:main'],
+         'console_scripts': ['instabackup=instabackup:main'],
      },
      author='Daniel Margolis',
      author_email='dan@af0.net.',
