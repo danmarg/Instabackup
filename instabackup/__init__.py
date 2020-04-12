@@ -57,7 +57,7 @@ for (fid, ftitle) in folders:
             if os.path.exists(fname + '.html'):
                 fname  += b.hash
             fname += '.html'
-            with open(os.path.join(out, fname), 'wb') as output:
+            with open(fname, 'wb') as output:
                 output.write(text)
             seen.append(b.bookmark_id)
         index[fid] = index.get(fid, []) + [str(b.bookmark_id) + ':' + b.hash] 
