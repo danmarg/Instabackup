@@ -4,6 +4,8 @@ import os.path
 import re
 
 from retry import retry
+from pyinstapaper import instapaper
+instapaper.REQUEST_DELAY_SECS = 0
 from pyinstapaper.instapaper import Instapaper
 
 def slugify(value):
@@ -41,17 +43,19 @@ def main():
         out = os.path.join(args.backup, ftitle)
         if not os.path.exists(out):
             os.makedirs(out)
-        bs = instapaper.get_bookmarks(fid, limit=500, have=index.get(str(fid), []))
+        bs = instapaper.get_bookmarks(fid, limit=500,
+                                      have=index.get(str(fid), []))
         i = 0
         tot = len(bs)
         for b in bs:
             i += 1
             fname = os.path.join(out, slugify(b.title))
             if os.path.exists(fname + '.html'):
-                fname  += b.hash
+                fname += b.hash
             fname += '.html'
             key = str(b.bookmark_id) + ':' + b.hash
-            # If there was an older copy of this article somewhere else, just move it.
+            # If there was an older copy of this article somewhere else, just
+            # move it.
             if key in index:
                 print(f'\t[{i} of {tot}] - Moving existing "{b.title}"')
                 os.rename(index[key], fname)
@@ -71,7 +75,8 @@ def main():
             # Save in the index the location of this item, and append this item
             # to the items we have for this folder.
             index[key] = fname
-            index[str(fid)] = index.get(str(fid), []) + [str(b.bookmark_id) + ':' + b.hash]
+            index[str(fid)] = index.get(str(fid), []) + [
+                    str(b.bookmark_id) + ':' + b.hash]
 
     # Save the backup index.
     with open(INDEX_FILE, 'w') as index_file:
