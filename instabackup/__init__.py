@@ -57,15 +57,17 @@ def main():
                 os.rename(index[key], fname)
             # Otherwise, download the full text.
             else:
-              print(f'\t[{i} of {tot}] - Downloading "{b.title}"')
-              text = None
-              try:
-                text = get_text(b)
-              except:
-                  print(f'Fatal error downloading "{b.title}"!')
-                  continue
-              with open(fname, 'wb') as output:
-                  output.write(text)
+                print(f'\t[{i} of {tot}] - Downloading "{b.title}"')
+                text = None
+                try:
+                    text = get_text(b)
+                except KeyboardInterrupt:
+                    raise
+                except Exception as e:
+                    print(f'Fatal error downloading "{b.title}": {e}')
+                    continue
+                with open(fname, 'wb') as output:
+                    output.write(text)
             # Save in the index the location of this item, and append this item
             # to the items we have for this folder.
             index[key] = fname
