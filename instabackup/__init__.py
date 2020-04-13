@@ -46,19 +46,29 @@ def main():
         tot = len(bs)
         for b in bs:
             i += 1
-            print(f'\t [{i} of {tot}] - Downloading "{b.title}"')
-            text = None
-            try:
-              text = get_text(b)
-            except:
-                print(f'Fatal error downloading "{b.title}"!')
-                continue
             fname = os.path.join(out, slugify(b.title))
             if os.path.exists(fname + '.html'):
                 fname  += b.hash
             fname += '.html'
-            with open(fname, 'wb') as output:
-                output.write(text)
+            key = str(b.bookmark_id) + ':' + b.hash
+            # If there was an older copy of this article somewhere else, just move it.
+            if key in index:
+                print(f'\t[{i} of {tot}] - Moving existing "{b.title}"')
+                os.rename(index[key], fname)
+            # Otherwise, download the full text.
+            else:
+              print(f'\t[{i} of {tot}] - Downloading "{b.title}"')
+              text = None
+              try:
+                text = get_text(b)
+              except:
+                  print(f'Fatal error downloading "{b.title}"!')
+                  continue
+              with open(fname, 'wb') as output:
+                  output.write(text)
+            # Save in the index the location of this item, and append this item
+            # to the items we have for this folder.
+            index[key] = fname
             index[str(fid)] = index.get(str(fid), []) + [str(b.bookmark_id) + ':' + b.hash]
 
     # Save the backup index.
