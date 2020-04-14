@@ -43,8 +43,8 @@ def main():
         out = os.path.join(args.backup, ftitle)
         if not os.path.exists(out):
             os.makedirs(out)
-        bs = instapaper.get_bookmarks(fid, limit=500,
-                                      have=index.get(str(fid), []))
+        bs, dels = instapaper.get_bookmarks_with_deleted(
+                       fid, limit=500, have=index.get(str(fid), []))
         i = 0
         tot = len(bs)
         for b in bs:
@@ -53,7 +53,7 @@ def main():
             if os.path.exists(fname + '.html'):
                 fname += b.hash
             fname += '.html'
-            key = str(b.bookmark_id) + ':' + b.hash
+            key = str(b.bookmark_id)
             # If there was an older copy of this article somewhere else, just
             # move it.
             if key in index:
@@ -77,6 +77,12 @@ def main():
             index[key] = fname
             index[str(fid)] = index.get(str(fid), []) + [
                     str(b.bookmark_id) + ':' + b.hash]
+        # Remove deleted bookmarks.
+        for key in dels:
+            print(f'Removing {len(dels)} old bookmarks...')
+            if key in index:
+                print(f'\tRemoving {index[key]}')
+                os.remove(index[key])
 
     # Save the backup index.
     with open(INDEX_FILE, 'w') as index_file:
