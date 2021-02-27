@@ -82,7 +82,11 @@ def main():
             print(f'Removing {len(dels)} old bookmarks...')
             if key in index:
                 print(f'\tRemoving {index[key]}')
-                os.remove(index[key])
+                try:
+                    os.remove(index[key])
+                except Exception as e:
+                    print(f'Error removing file: {e}')
+                    continue
 
     # Save the backup index.
     with open(INDEX_FILE, 'w') as index_file:
