@@ -20,7 +20,7 @@ setuptools.setup(
          'Operating System :: OS Independent',
      ],
      install_requires=[
-         'pyinstapaper',
+         'pyinstapaper @ git+https://github.com/danmarg/pyinstapaper.git',
          'retry',
     ],
  )
