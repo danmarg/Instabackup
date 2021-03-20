@@ -56,11 +56,16 @@ def main():
             key = str(b.bookmark_id)
             # If there was an older copy of this article somewhere else, just
             # move it.
+            success = False
             if key in index:
                 print(f'\t[{i} of {tot}] - Moving existing "{b.title}"')
-                os.rename(index[key], fname)
+                try:
+                    os.rename(index[key], fname)
+                    success = True
+                except FileNotFoundError:
+                    print(f'\t\tFile not found - trying to download instead')
             # Otherwise, download the full text.
-            else:
+            if not success:
                 print(f'\t[{i} of {tot}] - Downloading "{b.title}"')
                 text = None
                 try:
