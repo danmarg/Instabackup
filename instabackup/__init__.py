@@ -85,7 +85,6 @@ def main():
         # Remove deleted bookmarks.
         for key in dels:
             if key in index:
-                print(f'Removing {len(dels)} old bookmarks...')
                 print(f'\tRemoving {index[key]}')
                 try:
                     os.remove(index[key])
