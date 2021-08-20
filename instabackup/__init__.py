@@ -63,7 +63,8 @@ def main():
                     os.rename(index[key], fname)
                     success = True
                 except FileNotFoundError:
-                    print(f'\t\tFile not found - trying to download instead')
+                    print('\t\tFile not found - trying to download instead')
+                    index.pop(key)
             # Otherwise, download the full text.
             if not success:
                 print(f'\t[{i} of {tot}] - Downloading "{b.title}"')
