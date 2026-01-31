@@ -22,5 +22,6 @@ setuptools.setup(
      install_requires=[
          'pyinstapaper @ git+https://github.com/danmarg/pyinstapaper.git',
          'retry',
+         'setuptools',
     ],
  )
